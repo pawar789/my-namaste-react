@@ -1,7 +1,11 @@
 import resList from "../utils/mockData";
-import RestaurentCard from "./RestaurentCard";
-
-import { useState, useEffect } from "react"; // named import - {}
+import RestaurentCard, {
+  withPromtedLabel,
+  withPromted,
+} from "./RestaurentCard";
+import UserContext from "../utils/UserContext";
+import { useState, useEffect, useContext } from "react"; // named import - {}
+//import UserContext from "../utils/UserContext";
 import { Link } from "react-router-dom";
 import resList from "../utils/mockData";
 import Shimmer from "../Shimmer";
@@ -11,23 +15,27 @@ const Body = () => {
   const [listOfRestaurants, setListOfRestraurent] = useState([]);
   const [filteredRestaurant, setFilteredRestaurant] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const { loggedInUser, setUserName } = useContext(UserContext);
+  const RestaurentCardPromoted = withPromted(RestaurentCard);
   const onlineStatus = useOnileStatus();
   useEffect(() => {
     fetchData();
   }, []);
-
+ 
   const fetchData = async () => {
     const data = await fetch(
       "https://www.swiggy.com/dapi/restaurants/list/v5?lat=12.9431365&lng=77.6263452&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING"
     );
-    console.log("body rendered",listOfRestaurants);
+    console.log("body rendered", listOfRestaurants);
     const json = await data.json();
     console.log(data);
     // Optional Chaining
     setListOfRestraurent(
       json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants
     );
-    console.log(json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
+    console.log(
+      json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants
+    );
     setFilteredRestaurant(
       json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants
     );
@@ -40,7 +48,7 @@ const Body = () => {
       </h1>
     );
   }
-  return listOfRestaurants.length === 0 ? (
+  return listOfRestaurants?.length === 0 ? (
     <Shimmer />
   ) : (
     <div className="body">
@@ -91,6 +99,14 @@ const Body = () => {
             Top Rated Restaurent
           </button>
         </div>
+        <div className="search m-4 p-4 flex items-center">
+          <label>Username:</label>
+          <input
+            className="border border-black p-2"
+            value={loggedInUser}
+            onChange={(e) => setUserName(e.target.value)}
+          />
+        </div>
       </div>
       <div className="flex flex-wrap">
         {filteredRestaurant.map((restaurant) => (
@@ -98,7 +114,11 @@ const Body = () => {
             key={restaurant.info.id}
             to={"/restaurants/" + restaurant.info.id}
           >
-            <RestaurentCard resData={restaurant} />
+            {restaurant.info.veg ? (
+              <RestaurentCardPromoted resData={restaurant} />
+            ) : (
+              <RestaurentCard resData={restaurant} />
+            )}
           </Link>
         ))}
       </div>

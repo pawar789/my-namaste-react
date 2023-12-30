@@ -30,7 +30,6 @@ class UserClass extends React.Component {
   }
   render() {
     const { name, location, avatar_url } = this.state.userInfo;
-    debugger;
     console.log("child render called");
     return (
       <div className="userProfile">
